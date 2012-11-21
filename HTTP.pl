@@ -71,7 +71,7 @@ sub changePort($) {
         exit(1);
     }else{
         fileHandler($ports,$portsbak,$port,"Listen");
-	fileHandler($ports,$portsbak,$port,"NameVirtualHost\ \*\:");
+	fileHandler($ports,$portsbak,$port,"NameVirtualHost(\ \*\:)");
         print "Alteração efectuada com sucesso\n";
     }
 }
