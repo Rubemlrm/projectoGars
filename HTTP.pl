@@ -42,7 +42,7 @@ sub fileHandler($$$$){
     my $new_file=$_[1];
     my $value = $_[2];
     my $search_pattern =$_[3];
-    
+    print $search_pattern;
     rename($origin_file,$new_file);
     open(FILE,"<",$new_file) || die $!;
     open(NEW_FILE,">",$origin_file) || die $!;
@@ -54,9 +54,10 @@ sub fileHandler($$$$){
         }elsif($line =~ /^$search_pattern/){
             print NEW_FILE "$search_pattern $value\n";
         }else{
-            print NEW_FILE "$line\n";
-        }
-    }
+	    print NEW_FILE "$line\n";
+   		}
+	 }
+
     close(FILE);
     close(NEW_FILE);
     unlink($new_file);
@@ -70,6 +71,7 @@ sub changePort($) {
         exit(1);
     }else{
         fileHandler($ports,$portsbak,$port,"Listen");
+	fileHandler($ports,$portsbak,$port,"NameVirtualHost\ \*\:");
         print "Alteração efectuada com sucesso\n";
     }
 }
@@ -119,41 +121,6 @@ sub logLevel($){
         print "Alteração realizada com sucesso\n ";
     }
 }
-
-#saveClients()
-#Funcao que irá guardar todos os dados dos clientes
-sub saveClients($){
-    chomp(my $logfile = $_[0]);
-    rename($apache2,$apache2bak);
-    open(FILE,"<",$apache2bak) or die("error reading file.");
-    open(OUTFILE,">",$apache2) or die("error");
-    while(<FILE>){
-    my $line=$_;
-    chomp($line);
-    if($line eq 'LogFormat "%h %l %u %t \"%r\" %>s %0" common'){
-            print OUTFILE ('LogFormat "%h %a %l %u %t \"%r\" %>s %b" common');
-    }else{
-            print OUTFILE "$line\n";
-    }
-}
-print OUTFILE "CustomLog $logfile common\n";
-close(FILE);
-close(OUTFILE);
-unlink($apache2bak);
-}
-
-#funcao para reiniciar/iniciar/parar o apache2
-sub actions($){
-    my $act = $_[0];
-    if($act eq 'stop'){
-        system('sudo /etc/init.d/apache2 stop');
-    }elsif($act eq 'restart'){
-        system('sudo /etc/init.d/apache2 restart');
-    }else{
-        system('sudo /etc/init.d/apache2 start');
-    }
-}
-
 
 ##TO-DO List 
 #funcao para pesquisar nome ou ip no ficheiro
