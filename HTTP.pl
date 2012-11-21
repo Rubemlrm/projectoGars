@@ -42,7 +42,6 @@ sub fileHandler($$$$){
     my $new_file=$_[1];
     my $value = $_[2];
     my $search_pattern =$_[3];
-    print $search_pattern;
     rename($origin_file,$new_file);
     open(FILE,"<",$new_file) || die $!;
     open(NEW_FILE,">",$origin_file) || die $!;
@@ -70,8 +69,8 @@ sub changePort($) {
         print("Valor do porto inválido\n");
         exit(1);
     }else{
-        fileHandler($ports,$portsbak,$port,"Listen");
-	fileHandler($ports,$portsbak,$port,"NameVirtualHost(\ \*\:)");
+        #fileHandler($ports,$portsbak,$port,"Listen");
+	fileHandler($ports,$portsbak,$port,"NameVirtualHost\ \*\:");
         print "Alteração efectuada com sucesso\n";
     }
 }
