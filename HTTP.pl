@@ -23,8 +23,8 @@ sub main(){
     exit(1);
   }
   #verifica se o serviço está instalado
-  system("dpkg -s apache2 >null 2>1");
-    if($? == 1){ #caso seja igual a 1 dá erro
+    my $flag = `ls /etc/init.d | grep apache2`;
+    if($flag == 1){ #caso seja igual a 1 dá erro
     print "Não tem o serviçco instalado no seu computador!\nDeseja instalar o servico no seu computador?(S/N)\n";
     chomp(my $opt = <STDIN>);
     if($opt eq "S" || $opt eq "s"){
@@ -46,7 +46,7 @@ sub main(){
       }
     }
 
-    if((@ARGV == 0 || @ARGV > 4 ||$ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ || $ARGV[0] !~ /^(start|restart|stop)/)){
+    if((@ARGV == 0 || @ARGV > 4 ||$ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
         die("parametros invalidos. Execute ./HTTP -h para ajuda");
     }else{
         if($ARGV[0] eq "-p"){
@@ -58,7 +58,7 @@ sub main(){
         }elsif($ARGV[0] eq "-t"){
 			if(!($ARGV[1])){
 				print "ERRO: Devera especificar o timeout!\n";
-            }else{
+           		 }else{
 				&changeTimeout($ARGV[1]);
 			}
         }elsif($ARGV[0] eq "-n"){
@@ -139,12 +139,9 @@ sub changePort($) {
     if($port < 0 || $port > 65000){
         print("Valor do porto inválido\n");
         exit(1);
-        #validação de portos , de forma a não serem usados portos reservados
-    #}elsif($port =~ /(0|1|7|11|20|21|22|23|25|53|67|68|69)/){
-    #    print("Erro:Escolheu uma porta reservada!\n");
     }else{        
-        fileHandler($port,$portsbak,$port,"Listen","Listen $port");
-        fileHandler($port,$portsbak,$port,"NameVirtualHost.\*\:","NameVirtualHost *:$port");
+        fileHandler($ports,$portsbak,$port,"Listen","Listen $port");
+        fileHandler($ports,$portsbak,$port,"NameVirtualHost.\*\:","NameVirtualHost *:$port");
         fileHandler($default_vhost,$default_vhostbk,$port,"<VirtualHost.\*\:","<VirtualHost *:$port>");
         my $flag = `service apache2 restart`;
         if($? == 0){ #verifica se o ultimo comando foi efectuado com sucesso
@@ -184,9 +181,8 @@ sub errorLog($){
             exit(1);
         }else{
             my $dirname =  dirname($errorlog); #verifica a directoria do ficheiro de log
-            if(!$dirname){
-                print "Directoria onde pretende guardar o ficheiro não existe\n, o ficheiro irá ser guardado na directoria ~/bin/logs\n";
-                exit(1);
+	    if(! -d $dirname){
+                print "Directoria onde pretende guardar o ficheiro não exist!\n"; 
             }else{
                 fileHandler($apache2,$apache2bak,$errorlog,"ErrorLog","ErrorLog $errorlog");
                 my $flag = `service apache2 restart`;

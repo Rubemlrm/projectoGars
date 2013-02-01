@@ -1,0 +1,19 @@
+           #==========================================================================================================#
+           #                                    Manual HTTP                                                           #
+           #                                                                                                          #
+           #                                 Opcoes disponiveis                                                       #
+           #                                                                                                          #  
+           # -p => Altera o porto HTTP                                                                                #
+           #       ex:./HTTP.pl -p <porto>                                                                            # 
+           # -t => Alterar o Timeout para envio e recepcao de dados                                                   # 
+           #	   ex:./HTTP.pl -t <valor>                                                                            #
+	   # -f => Guardar num ficheiro os nomes de clientes e o seu respetivo endereco que se ligam                  #
+           # 	   -c => Nome do cliente ou IP a pesquisar (parametro opcional)                                       #
+           #       ex: -f <ficheiro_a_guardar> -c <nome_cliente_ou_ip>                                                #
+           # -l => Especifica o ficheiro de log de erros                                                              #
+           #             ex: ./HTTP.pl -l <ficheiro.log>                                                              #
+	   # -n => Especificar o nivel de logging <debug, info, notice, error, crit, alert, emerg>                    #
+           #       ex:./HTTP.pl -n <nivel de logging>                                                                 #
+           #                                                                                                          #
+           # restart,start,stop => Com estas opcoes podemos iniciar , parar ou reiniciar o servico                    # 
+           #==========================================================================================================#
