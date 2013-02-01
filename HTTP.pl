@@ -25,29 +25,29 @@ sub main(){
   #verifica se o serviço está instalado
   system("dpkg -s apache2 >null 2>1");
     if($? == 1){ #caso seja igual a 1 dá erro
-    print "Não tem o serviço instalado no seu computador!\nDeseja instalar o serviço no seu computador?(S/N)\n";
+    print "Não tem o serviçco instalado no seu computador!\nDeseja instalar o servico no seu computador?(S/N)\n";
     chomp(my $opt = <STDIN>);
     if($opt eq "S" || $opt eq "s"){
-        print "A executar instalação do serviço....\n";
+        print "A executar instalacao do servico....\n";
         system("apt-get install -y apache2"); #instala o serviço
         if($? != 0){
             print "ERRO: Ocorreu um erro ao tentar instalar o serviço!\n";
             print "Detalhes: $!"; #caso de erro mostra uma mensagem de rro
             exit(1);
         }else{
-            print "Instalação do serviço concluida com sucesso!\n";
+            print "Instalacao do servico concluida com sucesso!\n";
           }
     }elsif($opt eq "N" || $opt eq "n"){
-        print "O programa irá encerrar!\n ";
+        print "O programa ira encerrar!\n ";
         exit(1);
     }else{
-        print "ERRO: A opcção que escolheu é inválida!\n";
+        print "ERRO: A opccao que escolheu e invalida!\n";
         exit(1);
       }
     }
 
-    if((@ARGV == 0 || $ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
-        die("parametros inválidos");
+    if((@ARGV == 0 || $ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ || $ARGV[0] !~ /^(start|restart|stop)/)){
+        die("parametros invalidos". Execute ./HTTP -h para ajuda");
     }elsif(!(@ARGV < 2 || @ARGV > 4)){
         if($ARGV[0] eq "-p"){
             &changePort($ARGV[1]);
@@ -75,11 +75,11 @@ sub main(){
             }
         }
     }else{
-           print "Número de parametros inválido.Execute .HTTP.pl -h para ver a sintax a ser usada\n";
+           print "Numero de parametros invalido.Execute .HTTP.pl -h para ver a sintax a ser usada\n";
     }
 }
 
-#Função responsável pela Alteração de dados nos ficheiros de configuração 
+#Função responsável pela Alterteracao dos dados nos ficheiros de configuração 
 #@param $_[0] ficheiro de origem
 #@param $_[1] ficheiro Final 
 #@param $_[2] valor a ser alterado
@@ -91,8 +91,9 @@ sub fileHandler($$$$$){
     my $value = $_[2];
     my $search_pattern =$_[3];
     my $pattern_values = $_[4];
+    system("touch $new_file");
     move($origin_file,$new_file);
-    open(FILE,$new_file) || die $!;
+    open(FILE,"<",$new_file) || die $!;
     open(NEW_FILE,">",$origin_file) || die $!;
     while(<FILE>){
         chomp(my $line=$_);
@@ -117,8 +118,8 @@ sub changePort($) {
         print("Valor do porto inválido\n");
         exit(1);
         #validação de portos , de forma a não serem usados portos reservados
-    }elsif($port =~ /^(0|1|7|11|20|21|22|23|25|53|67|68|69)/){
-        print("Erro:Escolheu uma porta reservada!\n");
+    #}elsif($port =~ /(0|1|7|11|20|21|22|23|25|53|67|68|69)/){
+    #    print("Erro:Escolheu uma porta reservada!\n");
     }else{        
         fileHandler($port,$portsbak,$port,"Listen","Listen $port");
         fileHandler($port,$portsbak,$port,"NameVirtualHost.\*\:","NameVirtualHost *:$port");
@@ -139,7 +140,7 @@ sub changeTimeout($){
         print("Valor de Timeout inválido\n");
         exit(1);
     }else{
-        fileHandler($apache2,$apache2bak,$timeout,"Timeout","Timeout ");
+        fileHandler($apache2,$apache2bak,$timeout,"Timeout","Timeout $timeout ");
         my $flag = `service apache2 restart`;
         if($? == 0){ #verifica se o ultimo comando foi efectuado com sucesso
             print "Alteração efectuada com sucesso\n";
