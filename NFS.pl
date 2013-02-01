@@ -13,71 +13,84 @@ sub main(){
 
   #validação de permissões do utilizador
   if($uid != 0){
-    print "ERRO:Não pode executar este script senão tiver permissões de root!\n";
+    print "ERRO:Nao pode executar este script senao tiver permissoes de root!\n";
     exit(1);
   }
   #validação se o serviço está instalado
-  system("dpkg -s nfs-kernel-server >null 2>1");
-  if($? == 1){
-      print "Não tem o serviço instalado no seu computador!\nDeseja instalar o serviço no seu computador?(S/N)\n";
+  my $flag = `ls /etc/init.d | grep "nfs-kernel-service"`;
+  if(!($flag)){
+      print "Não tem o serviçco instalado no seu computador!\nDeseja instalar o servico  no seu computador?(S/N)\n";
       chomp(my $opt = <STDIN>);
       if($opt eq "S" || $opt eq "s"){
-          print "A executar instalação do serviço....\n";
+          print "A executar instalacao do servico....\n";
           system("apt-get install -y nfs-kernel-server"); #instala o serviço
           if($? != 0){ # verifca se deu erro
-              print "ERRO: Ocorreu um erro ao tentar instalar o serviço!\n";
+              print "ERRO: Ocorreu um erro ao tentar instalar o servico!\n";
               print "Detalhes: $!"; # mostra mensagem de erro
               exit(1);
           }else{
-              print "Instalação do serviço concluida com sucesso!\n";
+              print "Instalacao do servico concluida com sucesso!\n\n";
           }
       }elsif($opt eq "N" || $opt eq "n"){
-          print "O programa irá encerrar!\n ";
+          print "O programa ira encerrar!\n ";
           exit(1);
       }else{
-          print "ERRO: A opcção que escolheu é inválida!\n";
+          print "ERRO: A opcao que escolheu e invalida!\n";
           exit(1);
       }
   }
 
   #validação dos argumentos passados
   if((@ARGV == 0 || $ARGV[0] !~ /^-(l|t|a|d|h)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
-      print("ERRO:Parametros inválidos. Execute sudo ./NFS -h para ajuda");
+      print("ERRO:Parametros invaidos. Execute sudo ./NFS -h para ajuda");
       exit(1);
   }elsif(!(@ARGV < 1)){
     if($ARGV[0] eq "-l"){
       &listNFS();
     }elsif($ARGV[0] eq "-t"){
-      &showstats($ARGV[1]);
+      if(!($ARGV[1])){
+	print "ERRO: Devera especificar uma das opcoes extra. Execute ./NFS.pl -h para ajuda\n";
+      }else{
+      	&showstats($ARGV[1]);
+      }
     }elsif($ARGV[0] eq "-a"){
-      shift(@ARGV);
-      &addExport(\@ARGV);
+      if(!($ARGV[2])){
+	print "ERRO: Devera especificar uma directoria!\n";
+      }else{      
+	shift(@ARGV);
+      	&addExport(\@ARGV);
+      }
     }elsif($ARGV[0] eq "-d"){
-      &removeExport($ARGV[1]);
+      if(!($ARGV[1])){
+	print "ERRO: Deve especificar a directoria que pretende remover\n";
+	exit(1);
+      }else{
+      	&removeExport($ARGV[1]);
+      }
     }elsif($ARGV[0] =~ /(restart|stop|start)/){
-      system("/etc/init.d/nfs $ARGV[0]");
+      system("service nfs-kernel-server $ARGV[0]");
     }else{
       system("more docs/nfs.txt");
     }
   }else{
-    print "Número de parametros inválido.Execute ./NFS.pl -h para ver a sintax a ser usada.\n";
+    print "Numero de parametros invalido.Execute ./NFS.pl -h para ver a sintax a ser usada.\n";
   }
 }
 
 
-#Função que lista todas as pastas que o NFS está a partilhar
-sub	listNFS(){
+#Funcao ue lista todas as pastas que o NFS esta a partilhar
+sub listNFS(){
     my $list = `cat /etc/exports | grep "^/"|tr " " "#"|cut -f1 -d#`;
     if(!($list)){
-	print "O servidor de NFS não está a partilhar nenhuma directória!\n";
+	print "O servidor de NFS nao esta a partilhar nenhuma directoria!\n";
     }else{	
-    print "O servidor de NFS está a partilhar as seguintes directorias.\n";
+    print "O servidor de NFS esta a partilhar as seguintes directorias.\n";
     print $list;
     print "Fim da listagem.\n";
     }
 }
 
-#Função que remove uma exportação
+#Funcao que remove uma exportacao
 #var $_[0] => recebe um variavel que contem a directoria a ser eleminada
 
 sub removeExport($){
@@ -90,12 +103,12 @@ sub removeExport($){
   close(FILE);
   chomp(@file);
 
-  print "A verificar se partilha existe no ficheiro de exportações!\n";
+  print "A verificar se partilha existe no ficheiro de exportacoes!\n";
   if(!($flag= grep(/^$dir/, @file))){ 
-    print "ERRO: A partilha não existe no ficheiro de exportações!\n";
+    print "ERRO: A partilha não existe no ficheiro de exportaçcoesn";
     exit(1);
   }else{
-    print "AVISO: A partilha existe no ficheiro de exportaçãos.A iniciar processo de remoção!\n";
+    print "AVISO: A partilha existe no ficheiro de exportacoes iniciar processo de remocao\n";
     foreach my $line(@file){
       chomp($line);
       if($line =~ /^$dir/){
@@ -113,8 +126,8 @@ sub removeExport($){
       print FILE "$newfile \n";
       }  
     close(FILE);
-    print "Processo de remoção concluido!A reiniciar serviço NFS!\n";
-    system("/etc/init.d/nfs restart");
+    print "Processo de remocao concluido!A reiniciar servico NFS!\n";
+    system("service nfs-kernel-server restart");
   }
 }
 
@@ -127,7 +140,7 @@ sub addExport($){
   my(@hosts,@mods,@perm);
   my %hashlist;
   if($data < 2 && $data !~ /(2|4|6)/){
-      print "ERRO: Número de paramentros inválido!\n";
+      print "ERRO: Numero de paramentros inváalido!\n";
   }
  
   #verifica os dados passados e se são válidos
@@ -213,7 +226,7 @@ sub addExport($){
   $dir = &Valdir($dir);
   print $dir;
   
-  print "A iniciar actualização do ficheiro de exportações\n";
+  print "A iniciar actualizacoes do ficheiro de exportacoes\n";
   
   open(FILE,">>$nfsconf");
     print FILE "\n";
@@ -235,8 +248,8 @@ sub addExport($){
     }
   print "\n";
   close(FILE);
-  print "Actualização do ficheiro de exportações concluida\n";
-  system("/etc/init.d/nfs restart");
+  print "Actualizacao do ficheiro de exportacoes concluida\n";
+  system("service nfs-kernel-server restart");
 }
 
 #Função que irá validar se a directoria existe e realizar as opções necessárias
@@ -247,8 +260,9 @@ sub Valdir($){
   my $tmp_dir = $dir;
   my $choice;
   #verifica se foi especificado uma directoria
-  if(!($dir)){
-     print "ERRO: É obrigatório especificar uma directoria!\n";
+  print $dir;
+  if(! -d $dir){
+     print "ERRO: E obrigatorio specificar uma directoria!\n";
      exit(1);
   }
 
@@ -256,7 +270,7 @@ sub Valdir($){
   my $flag = `cat /etc/exports | grep "/^$dir$/`;
   print $flag;
   if($flag){
-    print ("AVISO: Partilha já existe\n");
+    print ("AVISO: Partilha ja existe\n");
     print "Pretende especificar outra directoria ?(S/N) \n";
     chomp($choice = <STDIN>);
     if($choice eq "S" || $choice eq "s"){
@@ -264,7 +278,7 @@ sub Valdir($){
       chomp($tmp_dir = <STDIN>);
       &Valdir($tmp_dir);
     }else{
-      print "ERRO: Devido a não se poderem ter entrada duplicadas no ficheiro export e a sua escolha ter sido Não o programa irá encerrar!\n";
+      print "ERRO: Devido a nao se poderem ter entrada duplicadas no ficheiro export e a sua escolha ter sido N o programa ira encerrar!\n";
       exit(1);
     }
 
@@ -272,12 +286,12 @@ sub Valdir($){
 
   #verificar se directoria existe , caso não existe apresta uma hipotese para cria-la
   if(!-d $dir){
-    print "ERRO: Directoria não existe. Pretende que a mesma seja criada?(S/N)\n";
+    print "ERRO: Directoria nao existe. Pretende que a mesma seja criada?(S/N)\n";
     chomp($choice = <STDIN>);
     if($choice eq "S" || $choice eq "s"){
       mkdir $dir || die $!;
     }else{
-      print "ERRO: Visto que não pretende que a directoria seja criada o script irá encerrar!\n";
+      print "ERRO: Visto que  nao pretende que a directoria seja criada o script ira encerrar!\n";
       exit(1);
     }
   }
@@ -315,7 +329,7 @@ sub generateList($$$){
       push(@perm,'ro');
     }
   }elsif($perm_size > $hosts_size){
-      print "ERRO: O número de permissões não pode ser superior ao número de hosts!\n";
+      print "ERRO: O numero de permissõoes nao deve ser superior ao númeumero  de hosts!\n";
       exit(1);
   }
     
@@ -327,7 +341,7 @@ sub generateList($$$){
      print "ERRO: O número de permissões não pode ser superior ao número de hosts!\n";
     exit(1);
   }else{
-    print "Validação do números de elementos das listagens terminadas.\n";
+    print "Validacao do  numero de elementos das listagens terminadas.\n";
   }
   
 
@@ -344,8 +358,8 @@ sub generateList($$$){
   $cont = 0;
   foreach my $tmp_perm (@perm){
     if($tmp_perm !~ /(ro|rw)/){  #verifca se a permissão é valudida
-      printf "AVISO: Devido a permissão atribuida ao host $hashlist{$cont}{'host'} ser inválida este host irá ficar com
-      permissões de read-only\n";
+      printf "AVISO: Devido a permissão atribuida ao host $hashlist{$cont}{'host'} ser invalida este host ira ficar com
+      permissoes de read-only\n";
       $hashlist{$cont}{'perm'} = 'ro';
       $cont++;
     }else{
@@ -358,8 +372,8 @@ sub generateList($$$){
   $cont = 0;
   foreach my $tmp_mod(@mods){ # verica se o modo é valido
     if($tmp_mod !~ /(no_root_squash|no_subtree_check|sync|async)/){
-     printf "AVISO: Devido ao parametro extra atribuido ao host $hashlist{$cont}{'host'} ser inválida este host irá ficar com
-     permissões de async!\n";
+     printf "AVISO: Devido ao parametro extra atribuido ao host $hashlist{$cont}{'host'} ser invalida este host ira ficar com
+     permissoes de async!\n";
      $hashlist{$cont}{'perm'} = 'ro';
      $cont++;
     }else{
@@ -379,19 +393,19 @@ sub valHost($){
   if($host =~ /^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/ || $host =~ /^([0-9a-fA-F]{4}|0)(\:([0-9a-fA-F]{4}|0)){7}$/){
 
     if(!is_ipv4($host) && !is_ipv6($host)){ #valida o ip
-      print "ERRO: Endereço $host não segue as normas do IPv4 nem IPv6!\n";
+      print "ERRO: Endereco $host não segue as normas do IPv4 nem IPv6!\n";
       exit(1);
     }
   }elsif($host =~ /^((([a-z]|[0-9]|\-)+)\.)+([a-z])+$/i){
     if(!is_domain($host)){ #valida o dominio
-        print "ERRO: Endereço $host inválido!\n"; 
+        print "ERRO: Endereco $host invalido\n"; 
         exit(1);
     }     
   }elsif($host eq "*"){
     print "AVISO: Todos os dispositivos terão acesso a esta partilha\n";
   
   }else{
-    print "ERRO: Informação do host é inválida!\n";
+    print "ERRO: Informacao do host $host invalida\n";
     exit(1);
   }
 }
@@ -400,7 +414,7 @@ sub valHost($){
 sub showstats($){
   my $param = $_[0];
   if($param !~ /^-(s|c|n|r|v|)/){
-    print "ERRO: Parametro extra inválido , faça ./NFS.pl -h para ver todas as opções disponiveis !\n";
+    print "ERRO: Parametro extra invalido, faça ./NFS.pl -h para ver todas as opçcoes disponiveis !\n";
     exit(1);
   }else{  
     if($param eq "-s"){
@@ -411,15 +425,15 @@ sub showstats($){
       system("nfsstat -c");
     }elsif($param eq "-n"){
       print "Estatisticas relativas ao serviço NFS vs 2/3/4 do mesmo\n";
-      system ("nssfstat -n234");
+      system ("nfsstat -n234");
     }elsif($param eq "-r"){
-      print "Estatisticas relativas ao RPC do serviço\n";
+      print "Estatisticas relativas ao RPC do servico\n";
       system("nfsstat -r");
     }elsif($param eq "-v"){
-      print "A imprimir todas as Estatisticas do serviço \n";
+      print "A imprimir todas as Estatisticas do servico \n";
       system("nfsstat -v");
     }else{
-      print "Não é possivel mostrar Estatisticas para o argumento passado\n";
+      print "Nao e possivel mostrar Estatisticas para o argumento passado\n";
     }
   }
 }
