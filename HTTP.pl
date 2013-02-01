@@ -23,8 +23,8 @@ sub main(){
     exit(1);
   }
   #verifica se o serviço está instalado
-  system("dpkg -s apache2 >null 2>1");
-    if($? == 1){ #caso seja igual a 1 dá erro
+    my $flag = `ls /etc/init.d | grep apache2`;
+    if(!($flag)){ #caso seja igual a 1 dá erro
     print "Não tem o serviçco instalado no seu computador!\nDeseja instalar o servico no seu computador?(S/N)\n";
     chomp(my $opt = <STDIN>);
     if($opt eq "S" || $opt eq "s"){
@@ -46,7 +46,7 @@ sub main(){
       }
     }
 
-    if((@ARGV == 0 || $ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ || $ARGV[0] !~ /^(start|restart|stop)/)){
+    if((@ARGV == 0 || $ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
         die("parametros invalidos". Execute ./HTTP -h para ajuda");
     }elsif(!(@ARGV < 2 || @ARGV > 4)){
         if($ARGV[0] eq "-p"){
