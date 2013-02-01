@@ -23,8 +23,8 @@ sub main(){
     exit(1);
   }
   #verifica se o serviço está instalado
-  system("dpkg -s apache2 >null 2>1");
-    if($? == 1){ #caso seja igual a 1 dá erro
+    my $flag = `ls /etc/init.d | grep apache2`;
+    if(!($flag)){ #caso seja igual a 1 dá erro
     print "Não tem o serviçco instalado no seu computador!\nDeseja instalar o servico no seu computador?(S/N)\n";
     chomp(my $opt = <STDIN>);
     if($opt eq "S" || $opt eq "s"){
@@ -46,9 +46,15 @@ sub main(){
       }
     }
 
+<<<<<<< HEAD
     if((@ARGV == 0 || @ARGV > 4 ||$ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ || $ARGV[0] !~ /^(start|restart|stop)/)){
         die("parametros invalidos. Execute ./HTTP -h para ajuda");
     }else{
+=======
+    if((@ARGV == 0 || $ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
+        die("parametros invalidos". Execute ./HTTP -h para ajuda");
+    }elsif(!(@ARGV < 2 || @ARGV > 4)){
+>>>>>>> 97bb1491a67418c0e60142a3a628deeb1bdb65f5
         if($ARGV[0] eq "-p"){
 			if(!($ARGV[1])){
 				print "Erro:Devera especificar a porta!\n";

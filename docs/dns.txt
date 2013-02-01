@@ -1,0 +1,28 @@
+           #====================================================================================================================================#
+           #                                    Manual DNS 											#
+           #                                                                                                          				#
+           #                                 Opcoes disponiveis 										#
+           #                                                                                                          				#
+           # -a => adiciona um novo dominio e usa a seguinte sintaxe 										#
+           #       Ex: ./DNS -a <dominio> <ip> 													#
+           #        Esta opcao recebe ainda um parametro opcional -f ,com este parametro podemos utilizar um ficheiro # de texto para indicar os# 
+           #        dados que queremos adicionar.  												#
+           #          Ex: ./DNS -a -f <ficheiro> 												#
+           #                                                                                                          				#
+           # -r => remove um dominio e usa a seguinte sintaxe 											#
+           #       EX: ./DNS -r <dominio> 													#
+           #                                                                                                          				#
+           # -e => adiciona uma nova entranda a um dominio: 											#
+           #        Ex: ./DNS -e <dominio> <resource type> <resource name > <host> # Em que o resource type pode ter os seguintes valores 	#
+           #        A,NS,PTR,MX,CNAME,TXT,HINFO 												#
+	   #  	    E o resource name so pode ter caracteres de a-z e 0-9 e "-" 								# 
+	   #		EX: ./DNS -e blasted.p -a dhcp  10.60.0.1 										#
+           #                                                                                                          				#	
+           # -d => remove uma entrada de um dominio: 												#	
+           #        Sintaxe: ./DNS -d <dominio> <resource name> # Ex: ./DNS -d blasted.pt dhcp 							#
+           #                                                                                                          				#
+           # -v => Verifica as configuracoes de dominio: 											#
+           #        Sintaxe: ./DNS -v <dominio> <ficheiro de configuracao> # Ex: ./DNS -v blasted.pt /etc/bind/db.blasted.pt  			#
+           #                                                                                                          				#
+           # restart,start,stop => Com estas opcoes podemos iniciar , parar ou reiniciar o servico                                              # 
+           #=================================================================================================================================== #
