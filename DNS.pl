@@ -10,39 +10,39 @@ my $tmpbind = "/tmp/bind.bk";
 
 sub main(){
     my $uid = `id -u`;
-    #validação de permissões de utilizador
+    #validacao de permissoes de utilizador
     if($uid != 0){
-        print "ERRO: Não pode executar este script se não tiver permissões root!\n";
+        print "ERRO: Nao pode executar este script se nao tiver permissoes root!\n";
         exit(1);
     }
 
-     #validação se o serviço está instalado
+     #validacao se o serviço está instalado
     my $flag = `ls /etc/init.d | grep bind9`;
     if(!($flag)){ #verica o output do ultimo comando se for igual a 1 dá erro
-    print "Não tem o serviço instalado no seu computador!\nDeseja instalar o serviço no seu computador?(S/N)\n";
+    print "Nao tem o serviço instalado no seu computador!\nDeseja instalar o serviço no seu computador?(S/N)\n";
     chomp(my $opt = <STDIN>);
     if($opt eq "S" || $opt eq "s"){
-        print "A executar instalação do serviço....\n";
+        print "A executar instalacao do servico....\n";
         system("apt-get install -y bind9"); #inicia a instalação do serviço
         if($? != 0){  #verifica o output do ultimo comando se for maior que 0 dá erro
-            print "ERRO: Ocorreu um erro ao tentar instalar o serviço!\n";
+            print "ERRO: Ocorreu um erro ao tentar instalar o servico!\n";
             print "Detalhes: $!"; #messagem de erro!
             exit(1);
         }else{
-            print "Instalação do serviço concluida com sucesso!\n";
+            print "Instalaco do serviço concluida com sucesso!\n";
           }
     }elsif($opt eq "N" || $opt eq "n"){
-        print "O programa irá encerrar!\n ";
+        print "O programa ira encerrar!\n ";
         exit(1);
     }else{
-        print "ERRO: A opcção que escolheu é inválida!\n";
+        print "ERRO: A opccao que escolheu é invalida!\n";
         exit(1);
       }
     }
     
-    #valida o numero de argumentos passados e se as opções estão correctas
+    #valida o numero de argumentos passados e se as opcoes estao correctas
     if((@ARGV == 0 || $ARGV[0] !~ /^-(h|a|r|f|e|d|v)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
-        die("ERRO:Parametros inválidos\n");
+        die("ERRO:Parametros invalidos\n");
 
     }elsif(!(@ARGV > 5)){
         if($ARGV[0] eq "-a"){
@@ -58,7 +58,7 @@ sub main(){
             &delDomain($ARGV[1]);
         }elsif($ARGV[0] eq "-e"){
             if(@ARGV != 5){
-                print "ERRO: Número de parametros inválidos! Execute ./DNS -h para verificar qual é a sintaxe
+                print "ERRO: Numero de parametros invalidos! Execute ./DNS -h para verificar qual é a sintaxe
                 correcta!\n";
                 exit(1);
             }else{
@@ -66,7 +66,7 @@ sub main(){
             }
         }elsif($ARGV[0] eq "-d"){
             if(@ARGV != 3){
-                print "ERRO: Número de parametros inválidos!Execute ./DNS -h para verificar a sintaxe correcta!\n";
+                print "ERRO: Numero de parametros invalidos!Execute ./DNS -h para verificar a sintaxe correcta!\n";
                 exit(1);
             }else{
                 &delDomainEntry($ARGV[1],$ARGV[2]);
@@ -75,7 +75,7 @@ sub main(){
             if(@ARGV == 3){
                 &testDomain($ARGV[1],$ARGV[2],$ARGV[3]);
             }else{
-                print "Número de parametros inválido!Execute ./DNS -h para vericar a sintaxe correcta!\n";
+                print "Numero de parametros invalido!Execute ./DNS -h para vericar a sintaxe correcta!\n";
                 exit(1);
             }
         }elsif($ARGV[0] =~ /(restart|stop|start)/){
@@ -84,7 +84,7 @@ sub main(){
             system("more docs/dns.txt");
         }
     }else{
-        print "Número de parametros inválido.Execute ./NFS.pl -h para ver a sintax a ser usada.\n";        
+        print "Numero de parametros invalido.Execute ./NFS.pl -h para ver a sintax a ser usada.\n";        
     }
 }
 
@@ -98,51 +98,51 @@ sub addDomain($$){
 
     my $grep = `grep "$domain" /etc/bind/named.conf.local`;
     if($grep){
-        print "ERRO: Já existem configurações para esse dominio!\n";
+        print "ERRO: Ja existem configuracoes para esse dominio!\n";
         exit(1);
     }
 
     if(-e "/etc/bind/db.$domain"){
-        print "ERRO: Já existe o ficheiro db. respectivo a esse dominio\n";
+        print "ERRO: Ja existe o ficheiro db. respectivo a esse dominio\n";
         exit(1);
     }
 
-    print "A validar dominio.....";
+    print "A validar dominio.....\n";
     if(!is_domain($domain)){ #verifica se é um dominio válido
-        print "ERRO:Dominio inválido!\n";
+        print "ERRO:Dominio invalido!\n";
         exit(1);
     }else{
         print "OK\n";
     }
 
-    print "A validar IP .....";
+    print "A validar IP .....\n";
     if(!($ip)){
-        print "Aviso:Não foi dado nenhum IP a usar o ip 127.0.0.1 por defeito!\n";
+        print "Aviso:Nao foi dado nenhum IP, a usar o ip 127.0.0.1 por defeito!\n";
         $ip = "127.0.0.1";
     }
     if(!(is_ipv4($ip)) || $ip ne "127.0.0.1"){ #verifica se é um ipv4 válido
-        print "ERRO:IP inserido é inválido\n";
+        print "ERRO:IP inserido e invalido\n";
     }
 
-    print "A validar existência de ficheiro db......";
+    print "A validar existencia de ficheiro db......";
     if(-e "/etc/bind/db.$domain"){ #verifica se ficheiro já existe
-        print "ERRO: Já existe um ficheiro de configuração para esse dominio\n";
+        print "ERRO: Ja existe um ficheiro de configuracao para esse dominio\n";
         exit(1);
     }else{
         print "Sucesso\n";
     }
 
-    print "A verificar se informação relativa ao dominio $domain já existe....\n";
+    print "A verificar se informacao relativa ao dominio $domain ja existe....\n";
     open(FILE,"<","$bind") || die $!;
     my @file = <FILE>;
     close(FILE);
     my @tmp = `grep "//zone $domain" $bind`; #verifica se entrada de dominio já existe no ficheiro de config
     $tmp = @tmp;
     if($tmp != 0){
-	    print "ERRO: Dominio já existe!\n";
+	    print "ERRO: Dominio ja existe!\n";
 	    exit(1);
     }else{
-        print "Não existe informação relativa ao dominio! A iniciar processo de criação...\n";
+        print "Não existe informacao relativa ao dominio! A iniciar processo de criacao...\n";
 	    &domainFilesCreator($domain,$ip);
     }
 }
@@ -177,10 +177,10 @@ sub delDomain($){
     }
 
     unlink("/etc/bind/db.$domain") || die $!; # apaga o ficheiro de configuração do dominio pretendido
-    print "Configuração relativa ao dominio $domain foi eliminada!\n ";
+    print "Configuracao relativa ao dominio $domain foi eliminada!\n ";
     system("service bind9 restart");
   }else{
-     print "ERRO: Não existe nenhuma informação relativa a esse dominio!\n";
+     print "ERRO: Nao existe nenhuma informacao relativa a esse dominio!\n";
      exit(1);
   }
 }
@@ -199,7 +199,7 @@ sub addSeveralDomains($){
     my @bind = <BIND>;
     close(BIND) || die $!;
     
-    print "A iniciar processo de criação de dominio...\n";
+    print "A iniciar processo de criacao de dominio...\n";
     #percorre o array dos dominios e verifica se ja existe o dominio!
 	foreach my $line (@file){
         chomp($line);
@@ -211,16 +211,16 @@ sub addSeveralDomains($){
             if($grep ne ""){
                 print "Aviso: Dominio \" $domain \" já existe!\n";
             }elsif(-e "/etc/bind/db.$domain"){
-                print "ERRO:FIcheiro de configuração  do $domain já existe!\n";
+                print "ERRO:FIcheiro de configuracao  do $domain ja existe!\n";
             }else{
                 if(!(is_domain($domain))){
-                    print "ERRO: Dominio $domain inválido!\n";
+                    print "ERRO: Dominio $domain invalido!\n";
                     exit(1);
                 }elsif(!(is_ipv4($ip)) && $ip ne "127.0.0.1"){
                     print "ERRO: $ip inválido!\n";
                 }else{
 				    &domainFilesCreator($domain,$ip);
-                    print "Sucesso: Foram criadas as configurações necessárias para o dominio $domain e seu respectivo ip $ip !\n";
+                    print "Sucesso: Foram criadas as configuracoes necessárias para o dominio $domain e seu respectivo ip $ip !\n";
 			    }
             }
     }
@@ -275,37 +275,37 @@ sub addDomainEntry($$$){
 
         #validação do tipo de resource record
         if($resourceRecords !~ /^(A|NS|PTR|MX|CNAME|TXT|HINFO)/){
-            print "ERRO: Resource Record inválido!\n";
+            print "ERRO: Resource Record invalido!\n";
             exit(1);
         }
 
         #validação do nome utilizado para o resource value
         if($resourceValue !~ /^[a-z0-9-]/i){
-            print "ERRO: Nome inválido para o Resource Record!\n";
+            print "ERRO: Nome invalido para o Resource Record!\n";
             exit(1);
         }
 
         #validação do host para saber se é um IP válido ou um dominio válido
         if(!(is_ipv4($host) || is_domain($host))){
-            print "ERRO: Host inválido!\n";
+            print "ERRO: Host invalido!\n";
             exit(1);
         }
 
         #verifica se existe o resource record no ficheiro
         my $grep = `grep "^$resourceValue" /etc/bind/db.$domain`;
         if($grep){
-            print"ERRO: Já existe esta informação no ficheiro de configuração do dominio $domain!\n";
+            print"ERRO: Ja existe esta informaçao no ficheiro de configuração do dominio $domain!\n";
             exit(1);
         }else{
             open(FILE,">>","/etc/bind/db.$domain") || die $!;
             print FILE "$resourceValue\t\tIN\t\t$resourceRecords\t\t$host\n";
             close(FILE) || die $!;
-            print "Adicionar informação ao ficheiro de configuração do dominio $domain com sucesso!\n";
+            print "Adicionar informacao ao ficheiro de configuracao do dominio $domain com sucesso!\n";
             system("service bind9 restart");
         }
 
     }else{
-        print "ERRO: Não existe nenhum ficheiro de configuração para o dominio $domain !\n";
+        print "ERRO: Nao existe nenhum ficheiro de configuracao para o dominio $domain !\n";
         exit(1);
     }
 }
@@ -323,7 +323,7 @@ sub delDomainEntry($$){
         #verifica se existe o recordValue que queremos apagar e caso exista devolve o número da linha
         my $grep = `grep -n "^$recordValue" /etc/bind/db.$domain | cut -d ":" -f1`;
         if($grep){
-            print "Ocurrência encontrada ! A efectuar operação de remoção!\n";
+            print "Ocurrencia encontrada ! A efectuar operacao de remocao!\n";
             open(FILE,"<","/etc/bind/db.$domain") || die $!;
             my @file = <FILE>;
             close(FILE);
@@ -337,11 +337,11 @@ sub delDomainEntry($$){
             print "Entrada do ficheiro db.$domain removida com sucesso!\n";
             system("service bind9 restart");
         }else{
-            print "ERRO: Não foi encontrada nenhuma ocurrência no ficheiro db.$domain !\n";
+            print "ERRO: Nao foi encontrada nenhuma ocurrencia no ficheiro db.$domain !\n";
             exit(1);
         }
     }else{
-        print "ERRO não existe nenhum ficheiro de configuração para o dominio $domain !\n";
+        print "ERRO nao existe nenhum ficheiro de configuraçao para o dominio $domain !\n";
         exit(1);
     }
 }
@@ -357,10 +357,10 @@ sub testDomain($$){
     
     #verifica se o ficheiro de config do dominio existe
     if(-e "$domainconf"){
-        print "A verificar configurações para o dominio $domain ...\n"; 
+        print "A verificar configuraçoes para o dominio $domain ...\n"; 
         system("named-checkzone $domain /etc/bind/db.$domainconf");
     }else{
-        print "ERRO:Não existe nenhum ficheiro de configuração relativo ao dominio $domain !\n";
+        print "ERRO:Nao existe nenhum ficheiro de configuracao relativo ao dominio $domain !\n";
         exit(1);
     }
 
