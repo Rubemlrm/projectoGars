@@ -17,8 +17,8 @@ sub main(){
     }
 
      #validação se o serviço está instalado
-    system("dpkg -s bind9 >null 2>1");
-    if($? == 1){ #verica o output do ultimo comando se for igual a 1 dá erro
+    my $flag = `ls /etc/init.d | grep bind9`;
+    if(!($flag)){ #verica o output do ultimo comando se for igual a 1 dá erro
     print "Não tem o serviço instalado no seu computador!\nDeseja instalar o serviço no seu computador?(S/N)\n";
     chomp(my $opt = <STDIN>);
     if($opt eq "S" || $opt eq "s"){
@@ -41,7 +41,7 @@ sub main(){
     }
     
     #valida o numero de argumentos passados e se as opções estão correctas
-    if((@ARGV == 0 || $ARGV[0] !~ /^-(a|r|f|e|d|v)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
+    if((@ARGV == 0 || $ARGV[0] !~ /^-(h|a|r|f|e|d|v)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
         die("ERRO:Parametros inválidos\n");
 
     }elsif(!(@ARGV > 5)){
