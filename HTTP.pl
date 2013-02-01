@@ -19,13 +19,13 @@ sub main(){
   my $uid = `id -u`;
   #validação de permissões do utilizador
   if($uid != 0){
-    print "ERRO:Não pode executar este script senão tiver permissões de root!\n";
+    print "ERRO:Nao pode executar este script senao tiver permissoes de root!\n";
     exit(1);
   }
   #verifica se o serviço está instalado
     my $flag = `ls /etc/init.d | grep apache2`;
     if($flag == 1){ #caso seja igual a 1 dá erro
-    print "Não tem o serviçco instalado no seu computador!\nDeseja instalar o servico no seu computador?(S/N)\n";
+    print "Nao tem o servico instalado no seu computador!\nDeseja instalar o servico no seu computador?(S/N)\n";
     chomp(my $opt = <STDIN>);
     if($opt eq "S" || $opt eq "s"){
         print "A executar instalacao do servico....\n";
@@ -120,7 +120,7 @@ sub fileHandler($$$$$){
     while(<FILE>){
         chomp(my $line=$_);
         if($line eq "$search_pattern $value"){
-            print "AVISO:configuração já existente no ficheiro $new_file \n A verificar os restantes campos!\n";
+            print "AVISO:configuracao ja existente no ficheiro $new_file \n A verificar os restantes campos!\n";
             print NEW_FILE "$line\n";
         }elsif($line =~ /^$search_pattern/){
             print NEW_FILE "$pattern_values\n";
@@ -146,9 +146,9 @@ sub changePort($) {
         my $flag = `service apache2 restart`;
         if($? == 0){ #verifica se o ultimo comando foi efectuado com sucesso
             &verifyPort($port);
-            print "Alteração efectuada com sucesso\n";
+            print "Alteracao efectuada com sucesso\n";
         }else{
-            print "Existem erros na configuração como tal não foi possivel iniciar o Apache\n";
+            print "Existem erros na configuracao como tal nao foi possivel iniciar o Apache\n";
         }
     }
 }
@@ -162,9 +162,9 @@ sub changeTimeout($){
         fileHandler($apache2,$apache2bak,$timeout,"Timeout","Timeout $timeout ");
         my $flag = `service apache2 restart`;
         if($? == 0){ #verifica se o ultimo comando foi efectuado com sucesso
-            print "Alteração efectuada com sucesso\n";
+            print "Alteracao efectuada com sucesso\n";
         }else{
-            print "Existem erros na configuração como tal não foi possivel iniciar o Apache!\n";
+            print "Existem erros na configuracao como tal nao foi possivel iniciar o Apache!\n";
         }
     }
 }
@@ -182,14 +182,14 @@ sub errorLog($){
         }else{
             my $dirname =  dirname($errorlog); #verifica a directoria do ficheiro de log
 	    if(! -d $dirname){
-                print "Directoria onde pretende guardar o ficheiro não exist!\n"; 
+                print "Directoria onde pretende guardar o ficheiro nao existe!\n"; 
             }else{
                 fileHandler($apache2,$apache2bak,$errorlog,"ErrorLog","ErrorLog $errorlog");
                 my $flag = `service apache2 restart`;
                 if($? == 0){ #verifica se ultimo comando foi efectuado com sucesso
                     print "Alteração efectuada com sucesso \n";
                 }else{
-                    print "Existem erros na configuração , como tal não foi possivel iniciar o Apache!\n";
+                    print "Existem erros na configuracao , como tal nao foi possivel iniciar o Apache!\n";
                 }
             }
         }
@@ -211,9 +211,9 @@ sub logLevel($){
         fileHandler($apache2,$apache2bak,$level,"LogLevel","LogLevel $level");
         my $flag = `service apache2 restart`;
         if($? == 0){
-            print "Alteração realizada com sucesso\n ";
+            print "Alteracao realizada com sucesso\n ";
         }else{
-            print "Existem erros na configuração , como tal não pode ser executado o Apache!\n";
+            print "Existem erros na configuracao , como tal nao pode ser executado o Apache!\n";
         }
     }
 }
@@ -229,7 +229,7 @@ sub saveClients($$){
             $string =~ tr/#/ /;
             print OUTFILE ("$string\n");
     }else{
-        print "Não foi encontrado nenhum resultado para esse valor de pesquisa!\n";
+        print "Nao foi encontrado nenhum resultado para esse valor de pesquisa!\n";
         exit(1);
     }
     close(OUTFILE);
@@ -242,10 +242,10 @@ sub verifyPort($){
     my $url = "http://localhost:$port";
     my $response = $mech->get($url); # irá verifcar se o link tem resposta ou não
     if(!$response->is_success){ # caso não tenha sucesso dá erro!
-        print "ERRO:Existe um erro na configuração e não é possivel aceder ao servidor apache pela porta $port !\n";
+        print "ERRO:Existe um erro na configuração e nao e possivel aceder ao servidor apache pela porta $port !\n";
         exit(1);
     }else{
-        print "Configuração testada com sucesso, para aceder ao servidor apache use o seguinte url
+        print "Configuracao testada com sucesso, para aceder ao servidor apache use o seguinte url
         http://localhost:$port !\n";
     }
 }
