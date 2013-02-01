@@ -3,7 +3,6 @@ use warnings;
 use strict;
 use Data::Validate::IP qw(is_ipv4 is_ipv6);
 use Data::Validate::Domain qw(is_domain);
-use Data::Dumper;
 #Global Vars
 my $nfsconf = "/etc/exports";
 
@@ -11,15 +10,40 @@ my $nfsconf = "/etc/exports";
 
 sub main(){
   my $uid = `id -u`;
+
   #validação de permissões do utilizador
   if($uid != 0){
     print "ERRO:Não pode executar este script senão tiver permissões de root!\n";
     exit(1);
   }
+  #validação se o serviço está instalado
+  system("dpkg -s nfs-kernel-server >null 2>1");
+  if($? == 1){
+      print "Não tem o serviço instalado no seu computador!\nDeseja instalar o serviço no seu computador?(S/N)\n";
+      chomp(my $opt = <STDIN>);
+      if($opt eq "S" || $opt eq "s"){
+          print "A executar instalação do serviço....\n";
+          system("apt-get install -y nfs-kernel-server"); #instala o serviço
+          if($? != 0){ # verifca se deu erro
+              print "ERRO: Ocorreu um erro ao tentar instalar o serviço!\n";
+              print "Detalhes: $!"; # mostra mensagem de erro
+              exit(1);
+          }else{
+              print "Instalação do serviço concluida com sucesso!\n";
+          }
+      }elsif($opt eq "N" || $opt eq "n"){
+          print "O programa irá encerrar!\n ";
+          exit(1);
+      }else{
+          print "ERRO: A opcção que escolheu é inválida!\n";
+          exit(1);
+      }
+  }
 
   #validação dos argumentos passados
   if((@ARGV == 0 || $ARGV[0] !~ /^-(l|t|a|d|h)$/ && $ARGV[0] !~ /^(start|restart|stop)/)){
-      die("ERRO:Parametros inválidos");
+      print("ERRO:Parametros inválidos. Execute sudo ./NFS -h para ajuda");
+      exit(1);
   }elsif(!(@ARGV < 1)){
     if($ARGV[0] eq "-l"){
       &listNFS();
@@ -33,7 +57,7 @@ sub main(){
     }elsif($ARGV[0] =~ /(restart|stop|start)/){
       system("/etc/init.d/nfs $ARGV[0]");
     }else{
-      system("more nfs.txt");
+      system("more docs/nfs.txt");
     }
   }else{
     print "Número de parametros inválido.Execute ./NFS.pl -h para ver a sintax a ser usada.\n";
@@ -43,10 +67,14 @@ sub main(){
 
 #Função que lista todas as pastas que o NFS está a partilhar
 sub	listNFS(){
-	my $list = `cat /etc/exports | grep "^/"|tr " " "#"|cut -f1 -d#`;
-	print "O servidor de NFS está a partilhar as seguintes directorias.\n";
-  print $list;
-  print "Fim da listagem.\n";
+    my $list = `cat /etc/exports | grep "^/"|tr " " "#"|cut -f1 -d#`;
+    if(!($list)){
+	print "O servidor de NFS não está a partilhar nenhuma directória!\n";
+    }else{	
+    print "O servidor de NFS está a partilhar as seguintes directorias.\n";
+    print $list;
+    print "Fim da listagem.\n";
+    }
 }
 
 #Função que remove uma exportação
@@ -63,7 +91,7 @@ sub removeExport($){
   chomp(@file);
 
   print "A verificar se partilha existe no ficheiro de exportações!\n";
-  if(!($flag= grep(/^$dir/, @file))){
+  if(!($flag= grep(/^$dir/, @file))){ 
     print "ERRO: A partilha não existe no ficheiro de exportações!\n";
     exit(1);
   }else{
@@ -102,13 +130,14 @@ sub addExport($){
       print "ERRO: Número de paramentros inválido!\n";
   }
  
+  #verifica os dados passados e se são válidos
   if ($data == 2 && @$data[0] || $data == 4 && @$data[2] || $data == 6 && @$data[4] || $data == 8 && @$data[6] !~
       /^-(dir|n|p|k)$/){
       print "ERRO: Anomalia na passagem de parametros\n";
      exit(1);
   }
 
-    
+  #verifica e atribui o valor a variavel correspondente 
   if (@$data[0] =~ /-dir/) { 
     $dir = @$data[1]; 
   }elsif(@$data[0] =~ /-n/){ 
@@ -314,7 +343,7 @@ sub generateList($$$){
   #Atribuição dos valores respectivos as permissões
   $cont = 0;
   foreach my $tmp_perm (@perm){
-    if($tmp_perm !~ /(ro|rw)/){ 
+    if($tmp_perm !~ /(ro|rw)/){  #verifca se a permissão é valudida
       printf "AVISO: Devido a permissão atribuida ao host $hashlist{$cont}{'host'} ser inválida este host irá ficar com
       permissões de read-only\n";
       $hashlist{$cont}{'perm'} = 'ro';
@@ -327,7 +356,7 @@ sub generateList($$$){
 
   #Atribuição dos valores respectivos as parametros extra
   $cont = 0;
-  foreach my $tmp_mod(@mods){
+  foreach my $tmp_mod(@mods){ # verica se o modo é valido
     if($tmp_mod !~ /(no_root_squash|no_subtree_check|sync|async)/){
      printf "AVISO: Devido ao parametro extra atribuido ao host $hashlist{$cont}{'host'} ser inválida este host irá ficar com
      permissões de async!\n";
@@ -345,16 +374,17 @@ sub generateList($$$){
 #Esta função irá validar se o valor da variavel é valido ou não
 #var $_[0] => recebe a variavel com o valor do host
 sub valHost($){
-  my $host = $_[0];
+  my $host = $_[0]; 
+  #verifica se o host é um ip v4,v6 ou um dominio
   if($host =~ /^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/ || $host =~ /^([0-9a-fA-F]{4}|0)(\:([0-9a-fA-F]{4}|0)){7}$/){
 
-    if(!is_ipv4($host) && !is_ipv6($host)){
+    if(!is_ipv4($host) && !is_ipv6($host)){ #valida o ip
       print "ERRO: Endereço $host não segue as normas do IPv4 nem IPv6!\n";
       exit(1);
     }
   }elsif($host =~ /^((([a-z]|[0-9]|\-)+)\.)+([a-z])+$/i){
-    if(!is_domain($host)){
-        print "ERRO: Endereço $host inválido!\n";
+    if(!is_domain($host)){ #valida o dominio
+        print "ERRO: Endereço $host inválido!\n"; 
         exit(1);
     }     
   }elsif($host eq "*"){
