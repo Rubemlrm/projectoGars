@@ -46,24 +46,48 @@ sub main(){
       }
     }
 
-    if((@ARGV == 0 || $ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ || $ARGV[0] !~ /^(start|restart|stop)/)){
-        die("parametros invalidos". Execute ./HTTP -h para ajuda");
-    }elsif(!(@ARGV < 2 || @ARGV > 4)){
+    if((@ARGV == 0 || @ARGV > 4 ||$ARGV[0] !~ /^-(h|p|t|f|c|l|n)$/ || $ARGV[0] !~ /^(start|restart|stop)/)){
+        die("parametros invalidos. Execute ./HTTP -h para ajuda");
+    }else{
         if($ARGV[0] eq "-p"){
-            &changePort($ARGV[1]);
+			if(!($ARGV[1])){
+				print "Erro:Devera especificar a porta!\n";
+			}else{
+				&changePort($ARGV[1]);
+			}
         }elsif($ARGV[0] eq "-t"){
-            &changeTimeout($ARGV[1]);
+			if(!($ARGV[1])){
+				print "ERRO: Devera especificar o timeout!\n";
+            }else{
+				&changeTimeout($ARGV[1]);
+			}
         }elsif($ARGV[0] eq "-n"){
-            &logLevel($ARGV[1]);
-        }elsif($ARGV[0] eq "-l"){
-            &errorLog($ARGV[1]);
+            if(!($ARGV[1])){
+				print "Error devera especifcar o nivel de logging!\n";
+			}else{
+				&logLevel($ARGV[1]);
+			}
+		}elsif($ARGV[0] eq "-l"){
+            if(!($ARGV[1])){
+				print "Erro : Devera especificar o caminho para o log de erros!\n";
+			}else{
+				&errorLog($ARGV[1]);
+			}
         }elsif($ARGV[0] eq "-f"){
+			if(!($ARGV[1])){
+				print "ERRO: Devera indicar o ficheiro onde serao guardados os dados de pesquisa";
+				exit(1);
+			}
             if($ARGV[2] ne "-c"){
                 print "ERRO: Tem que especificar um campo de pesquisa! \n";
                 exit(1);
             }else{
-                &saveClients($ARGV[1], $ARGV[3]);
-            }
+				if(!($ARGV[3])){
+					print "ERRO: Devera especificar o valor de pesquisa!\n";
+				}else{
+					&saveClients($ARGV[1], $ARGV[3]);
+				}
+			}
         }elsif($ARGV[0] eq "-h"){
             system("more docs/http.txt");
         }elsif($ARGV[0] =~ /(restart|stop|start)/){
@@ -74,8 +98,6 @@ sub main(){
                 print "Ocorreu um erro a executar o comando $ARGV[0]!\n";
             }
         }
-    }else{
-           print "Numero de parametros invalido.Execute .HTTP.pl -h para ver a sintax a ser usada\n";
     }
 }
 
